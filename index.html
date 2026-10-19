@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ExpenseIQ — A smart personal finance tracker. Track income and expenses, visualise spending by category, and review monthly summaries." />
+  <title>ExpenseIQ — Smart Expense Tracker</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+  <!-- CSS (order matters) -->
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+  <link rel="stylesheet" href="css/chart.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════════ -->
+  <nav class="navbar" role="banner">
+    <div class="navbar-brand">
+      <span class="brand-icon" aria-hidden="true">💰</span>
+      <span class="brand-name">ExpenseIQ</span>
+    </div>
+    <div class="navbar-actions">
+      <span class="transaction-count-badge" id="txnCount">0 transactions</span>
+      <button class="btn-icon theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle theme">☀️</button>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════ -->
+  <main class="main-content" id="main">
+
+    <!-- ── Summary Cards ── -->
+    <section class="summary-section" aria-label="Financial summary">
+
+      <div class="summary-card income-card" id="incomeCard">
+        <div class="card-icon-wrap" aria-hidden="true">💹</div>
+        <div class="card-info">
+          <span class="card-label">Total Income</span>
+          <span class="card-amount" id="totalIncome">₹0.00</span>
+        </div>
+      </div>
+
+      <div class="summary-card expense-card" id="expenseCard">
+        <div class="card-icon-wrap" aria-hidden="true">📉</div>
+        <div class="card-info">
+          <span class="card-label">Total Expenses</span>
+          <span class="card-amount" id="totalExpenses">₹0.00</span>
+        </div>
+      </div>
+
+      <div class="summary-card balance-card" id="balanceCard">
+        <div class="card-icon-wrap" aria-hidden="true">⚖️</div>
+        <div class="card-info">
+          <span class="card-label">Current Balance</span>
+          <span class="card-amount" id="currentBalance">₹0.00</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── Dashboard Grid ── -->
+    <div class="dashboard-grid">
+
+      <!-- LEFT PANEL: Filters + Transactions -->
+      <div class="panel left-panel" role="region" aria-label="Transactions">
+
+        <!-- Filter Bar -->
+        <div class="filters-bar" role="search">
+          <div class="filter-search">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input
+              type="search"
+              id="searchInput"
+              class="search-input"
+              placeholder="Search transactions…"
+              aria-label="Search transactions"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="filter-tabs" role="tablist" aria-label="Filter by type">
+            <button class="filter-tab active" role="tab" aria-selected="true"  data-type="all"     id="tabAll">All</button>
+            <button class="filter-tab"        role="tab" aria-selected="false" data-type="income"  id="tabIncome">Income</button>
+            <button class="filter-tab"        role="tab" aria-selected="false" data-type="expense" id="tabExpense">Expenses</button>
+          </div>
+
+          <select id="categoryFilter" class="filter-select" aria-label="Filter by category">
+            <option value="all">All Categories</option>
+          </select>
+        </div>
+
+        <!-- Transaction List -->
+        <div class="transactions-list" id="transactionsList" role="list" aria-label="Transaction list" aria-live="polite">
+          <div class="empty-state" id="emptyState" role="status">
+            <span class="empty-icon" aria-hidden="true">📭</span>
+            <p>No transactions yet</p>
+            <p class="empty-sub">Tap <strong>+</strong> to add your first one!</p>
+          </div>
+        </div>
+
+      </div><!-- /left-panel -->
+
+      <!-- RIGHT PANEL: Chart + Monthly Summary -->
+      <div class="right-panel">
+
+        <!-- Chart Panel -->
+        <div class="panel chart-panel" role="region" aria-label="Expense breakdown by category">
+          <div class="panel-header">
+            <h2 class="panel-title">Expense Breakdown</h2>
+            <span class="panel-subtitle">by category</span>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="expenseChart" role="img" aria-label="Donut chart of expenses by category"></canvas>
+            <div class="chart-center-text" aria-hidden="true">
+              <span class="chart-total-label" id="chartTotalLabel">Expenses</span>
+              <span class="chart-total-amount" id="chartTotalAmount">₹0</span>
+            </div>
+          </div>
+
+          <div class="chart-legend" id="chartLegend" aria-label="Chart legend">
+            <p class="chart-empty-msg">Add expenses to see the breakdown</p>
+          </div>
+        </div>
+
+        <!-- Monthly Summary Panel -->
+        <div class="panel monthly-panel" role="region" aria-label="Monthly summary">
+          <div class="panel-header">
+            <h2 class="panel-title">Monthly Summary</h2>
+          </div>
+
+          <div class="monthly-table-wrapper">
+            <table class="monthly-table" id="monthlyTable" aria-label="Monthly income and expense summary">
+              <thead>
+                <tr>
+                  <th scope="col">Month</th>
+                  <th scope="col">Income</th>
+                  <th scope="col">Expenses</th>
+                  <th scope="col">Balance</th>
+                </tr>
+              </thead>
+              <tbody id="monthlyTableBody">
+                <tr>
+                  <td colspan="4" class="empty-table-msg">No transactions yet</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /right-panel -->
+
+    </div><!-- /dashboard-grid -->
+  </main>
+
+  <!-- ══════════════════════════════════════
+       FAB — Floating Add Button
+  ══════════════════════════════════════ -->
+  <button class="fab" id="fabBtn" aria-label="Add new transaction" title="Add transaction">
+    +
+  </button>
+
+  <!-- ══════════════════════════════════════
+       ADD / EDIT TRANSACTION MODAL
+  ══════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal" id="modal">
+
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Add Transaction</h2>
+        <button class="modal-close" id="modalClose" aria-label="Close modal">×</button>
+      </div>
+
+      <form class="modal-form" id="transactionForm" novalidate>
+
+        <!-- Hidden fields -->
+        <input type="hidden" id="transactionType" value="expense" />
+        <input type="hidden" id="editingId" value="" />
+
+        <!-- Income / Expense Toggle -->
+        <div class="type-toggle-group" role="group" aria-label="Transaction type">
+          <button type="button" class="type-btn expense-btn active" data-type="expense" id="typeExpense" aria-pressed="true">
+            📉 Expense
+          </button>
+          <button type="button" class="type-btn income-btn" data-type="income" id="typeIncome" aria-pressed="false">
+            📈 Income
+          </button>
+        </div>
+
+        <!-- Amount -->
+        <div class="form-group">
+          <label for="amountInput" class="form-label">Amount</label>
+          <div class="input-wrapper">
+            <span class="input-prefix" aria-hidden="true">₹</span>
+            <input
+              type="number"
+              id="amountInput"
+              class="form-input"
+              placeholder="0.00"
+              min="0.01"
+              step="0.01"
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="amountError"
+            />
+          </div>
+          <span class="form-error" id="amountError" role="alert" aria-live="polite"></span>
+        </div>
+
+        <!-- Category -->
+        <div class="form-group">
+          <label for="categoryInput" class="form-label">Category</label>
+          <select
+            id="categoryInput"
+            class="form-input form-select"
+            aria-required="true"
+            aria-describedby="categoryError"
+          >
+            <option value="">Select a category…</option>
+          </select>
+          <span class="form-error" id="categoryError" role="alert" aria-live="polite"></span>
+        </div>
+
+        <!-- Date -->
+        <div class="form-group">
+          <label for="dateInput" class="form-label">Date</label>
+          <input
+            type="date"
+            id="dateInput"
+            class="form-input"
+            aria-required="true"
+            aria-describedby="dateError"
+          />
+          <span class="form-error" id="dateError" role="alert" aria-live="polite"></span>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="descriptionInput" class="form-label">
+            Description <span class="optional">(optional)</span>
+          </label>
+          <input
+            type="text"
+            id="descriptionInput"
+            class="form-input"
+            placeholder="Add a note…"
+            maxlength="120"
+            autocomplete="off"
+            aria-describedby="descriptionError charCount"
+          />
+          <span class="form-error" id="descriptionError" role="alert" aria-live="polite"></span>
+          <span class="char-count" id="charCount" aria-live="polite">0/120</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" id="cancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Add Transaction</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       CONFIRM DELETE DIALOG
+  ══════════════════════════════════════ -->
+  <div class="confirm-overlay" id="confirmOverlay" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="confirm-box">
+      <div class="confirm-icon" aria-hidden="true">🗑️</div>
+      <h3 class="confirm-title" id="confirmTitle">Delete Transaction?</h3>
+      <p class="confirm-msg" id="confirmMsg">This transaction will be permanently removed.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="confirmCancelBtn">Keep it</button>
+        <button class="btn-danger" id="confirmDeleteBtn">Yes, delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCRIPTS (load order matters)
+  ══════════════════════════════════════ -->
+  <script src="js/utils.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/transactions.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/summary.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
